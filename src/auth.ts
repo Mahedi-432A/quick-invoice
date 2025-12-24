@@ -57,12 +57,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role; // টোকেনে রোল সেভ করা
+        token.sub = user.id; // নিশ্চিত করা হচ্ছে যে ID টোকেনে আছে
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token.sub) {
         session.user.role = token.role; // সেশনে রোল অ্যাভেইলেবল করা
+        session.user.id = token.sub; // সেশনে ইউজার আইডি অ্যাভেইলেবল করা
       }
       return session;
     },
