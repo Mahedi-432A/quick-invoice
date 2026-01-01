@@ -6,7 +6,6 @@ import Invoice from "@/models/invoice-model";
 import Client from "@/models/client-model";
 import { revalidatePath } from "next/cache";
 
-// টাইপ ডেফিনিশন আপডেট (invoiceName এখন অপশনাল, কারণ সার্ভার এটি বানাবে)
 interface InvoiceItem {
   description: string;
   quantity: number;
@@ -16,7 +15,7 @@ interface InvoiceItem {
 
 interface InvoiceData {
   clientId: string;
-  invoiceName?: string; // এটি এখন অপশনাল (?)
+  invoiceName?: string;
   date: Date;
   dueDate: Date;
   status: string;
@@ -25,6 +24,7 @@ interface InvoiceData {
   taxRate: number;
   taxAmount: number;
   totalAmount: number;
+  paidAmount: number;
   notes?: string;
 }
 
@@ -33,11 +33,28 @@ export async function getInvoices() {
   if (!session?.user?.id) return [];
 
   await connectDB();
+
+  // --- নতুন লজিক শুরু (অটোমেটিক স্ট্যাটাস আপডেট) ---
+  const now = new Date();
+  
+  // যেগুলোর ডিউ ডেট পার হয়ে গেছে এবং স্ট্যাটাস এখনো 'pending', সেগুলোকে 'overdue' করা হচ্ছে
+  await Invoice.updateMany(
+    {
+      userId: session.user.id, // শুধু এই ইউজারের ডাটা চেক হবে
+      status: "pending",
+      dueDate: { $lt: now } // $lt মানে less than (বর্তমান সময়ের চেয়ে পুরনো)
+    },
+    {
+      $set: { status: "overdue" }
+    }
+  );
+  // --- নতুন লজিক শেষ ---
+
   const invoices = await Invoice.find({ userId: session.user.id })
     .populate({ 
       path: "clientId", 
-      model: Client, // এই লাইনটি ম্যাজিক করবে
-      select: "name email" // শুধু নাম আর ইমেইল আনবে
+      model: Client, 
+      select: "name email" 
     })
     .sort({ createdAt: -1 });
 
@@ -50,13 +67,19 @@ export async function createInvoice(data: InvoiceData) {
 
   try {
     await connectDB();
-    // ইনভয়েস নাম জেনারেট করছি সার্ভারে
     const invoiceName = `INV-${Date.now().toString().slice(-6)}`;
+
+    // স্ট্যাটাস লজিক
+    let calculatedStatus = "pending";
+    if (data.paidAmount >= data.totalAmount) {
+        calculatedStatus = "paid";
+    }
 
     await Invoice.create({
       userId: session.user.id,
-      invoiceName, // জেনারেট করা নাম
+      invoiceName,
       ...data,
+      status: calculatedStatus, // ফিক্স: এখানে ক্যালকুলেট করা স্ট্যাটাসটি ফোর্স করা হলো
     });
 
     revalidatePath("/dashboard/invoices");
@@ -89,7 +112,7 @@ export async function getInvoiceById(id: string) {
 
   const invoice = await Invoice.findOne({ _id: id, userId: session.user.id })
     .populate("clientId")
-    .populate("userId"); // ইউজারের বিজনেস ইনফো (লোগো, ঠিকানা) পাওয়ার জন্য
+    .populate("userId");
 
   if (!invoice) return null;
 
@@ -103,18 +126,45 @@ export async function updateInvoiceStatus(invoiceId: string, status: string) {
   try {
     await connectDB();
     
-    // ডাটাবেসে স্ট্যাটাস আপডেট করা
     await Invoice.findOneAndUpdate(
-      { _id: invoiceId, userId: session.user.id }, // সিকিউরিটি: শুধু নিজের ইনভয়েস আপডেট হবে
+      { _id: invoiceId, userId: session.user.id },
       { status: status }
     );
     
-    // UI আপডেট করার জন্য ক্যাশ ক্লিয়ার করা
     revalidatePath(`/dashboard/invoices/${invoiceId}`);
     revalidatePath("/dashboard/invoices");
     
     return { success: "Status updated" };
   } catch (error) {
     return { error: "Failed to update status" };
+  }
+}
+
+export async function addPayment(invoiceId: string, amount: number) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  try {
+    await connectDB();
+    
+    const invoice = await Invoice.findOne({ _id: invoiceId, userId: session.user.id });
+    if (!invoice) return { error: "Invoice not found" };
+
+    const currentPaid = invoice.paidAmount || 0;
+    const newPaidAmount = currentPaid + amount;
+
+    let newStatus = "pending";
+    if (newPaidAmount >= invoice.totalAmount) {
+      newStatus = "paid";
+    }
+
+    invoice.paidAmount = newPaidAmount;
+    invoice.status = newStatus;
+    await invoice.save();
+
+    revalidatePath(`/dashboard/invoices/${invoiceId}`);
+    return { success: "Payment added successfully" };
+  } catch (error) {
+    return { error: "Failed to add payment" };
   }
 }

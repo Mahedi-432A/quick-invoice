@@ -45,6 +45,10 @@ const invoiceSchema = new mongoose.Schema(
     },
     taxAmount: Number,
     totalAmount: Number, // ফাইনাল দাম
+    paidAmount: {
+      type: Number,
+      default: 0,
+    },
     notes: String, // কাস্টমারকে দেওয়ার জন্য নোট
   },
   { timestamps: true }

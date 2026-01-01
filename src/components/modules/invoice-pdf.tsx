@@ -32,6 +32,7 @@ interface InvoiceData {
   taxRate: number;
   taxAmount: number;
   totalAmount: number;
+  paidAmount?: number;
 }
 
 interface SettingsData {
@@ -143,6 +144,18 @@ export function InvoicePDF({ invoice, settings }: InvoicePDFProps) {
             <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
               <span>Total</span>
               <span>{settings?.currency || "BDT"} {invoice.totalAmount.toFixed(2)}</span>
+            </div>
+
+            <div className="flex justify-between text-sm text-green-600 font-medium pt-1">
+              <span>Paid</span>
+              <span>- {invoice.paidAmount ? invoice.paidAmount.toFixed(2) : "0.00"}</span>
+            </div>
+            
+            <div className="flex justify-between text-base font-bold text-gray-800 border-t border-dashed pt-2">
+              <span>Amount Due</span>
+              <span>
+                {settings?.currency || "BDT"} {(invoice.totalAmount - (invoice.paidAmount || 0)).toFixed(2)}
+              </span>
             </div>
           </div>
         </div>

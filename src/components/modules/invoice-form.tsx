@@ -52,6 +52,7 @@ export function InvoiceForm({ clients, defaultTax }: InvoiceFormProps) {
     { description: "", quantity: 1, price: 0 },
   ]);
   const [taxRate, setTaxRate] = useState(defaultTax || 0);
+  const [paidAmount, setPaidAmount] = useState(0);
 
   const subTotal = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
   const taxAmount = (subTotal * taxRate) / 100;
@@ -95,7 +96,7 @@ export function InvoiceForm({ clients, defaultTax }: InvoiceFormProps) {
     const invoiceData = {
       clientId,
       // invoiceName: ... (এটি এখন সার্ভারে তৈরি হবে)
-      date: date,
+      date: date!,
       dueDate: dueDate,
       status: "pending",
       items: items.map(item => ({...item, total: item.quantity * item.price})),
@@ -103,6 +104,7 @@ export function InvoiceForm({ clients, defaultTax }: InvoiceFormProps) {
       taxRate,
       taxAmount,
       totalAmount,
+      paidAmount
     };
 
     const res = await createInvoice(invoiceData);
@@ -243,6 +245,21 @@ export function InvoiceForm({ clients, defaultTax }: InvoiceFormProps) {
           <div className="flex justify-between py-2 text-lg font-bold">
             <span>Grand Total</span>
             <span>{totalAmount.toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between items-center py-2 border-b bg-green-50 px-2 rounded">
+            <span className="text-green-700 font-medium">Amount Paid</span>
+            <Input 
+              type="number" 
+              className="w-24 text-right h-8 border-green-200 focus:ring-green-500" 
+              value={paidAmount}
+              onChange={(e) => setPaidAmount(parseFloat(e.target.value) || 0)}
+            />
+          </div>
+
+          <div className="flex justify-between py-2 text-gray-500 text-sm">
+            <span>Balance Due</span>
+            <span>{(totalAmount - paidAmount).toFixed(2)}</span>
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
