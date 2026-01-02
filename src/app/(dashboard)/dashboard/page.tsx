@@ -1,34 +1,94 @@
+import { getDashboardData } from "@/actions/dashboard-actions";
+import { getSettings } from "@/actions/settings-actions";
 import { auth } from "@/auth";
+import { OverviewChart } from "@/components/modules/overview-chart";
+import { RecentSales } from "@/components/modules/recent-sales";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, DollarSign, Users, FileText } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  // সেশন চেক করা (সার্ভার সাইড প্রটেকশন)
   const session = await auth();
+  if (!session) redirect("/login");
 
-  if (!session) {
-    redirect("/login");
-  }
+  // প্যারালাল ডাটা ফেচিং
+  const [data, settings] = await Promise.all([
+    getDashboardData(),
+    getSettings()
+  ]);
+
+  if (!data) return <div>Failed to load dashboard data.</div>;
+
+  const currency = settings?.currency || "৳";
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-      <p className="text-gray-500">
-        Welcome back, <span className="font-bold text-black">{session.user?.name}</span>
-      </p>
-      
-      {/* স্ট্যাটাস কার্ড (আপাতত ডামি ডাটা) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div className="p-6 bg-white border rounded-xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Total Revenue</h3>
-          <p className="text-2xl font-bold mt-2">৳ 0.00</p>
+    <div className="flex-1 space-y-4">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currency} {data.totalRevenue.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              +20.1% from last month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Outstanding Due</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{currency} {data.totalDue.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              Pending payments from clients
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Invoices</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+{data.totalInvoices}</div>
+            <p className="text-xs text-muted-foreground">
+              Total invoices generated
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">+{data.totalClients}</div>
+            <p className="text-xs text-muted-foreground">
+              Total registered clients
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts and Recent Sales */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+            <OverviewChart data={data.graphData} />
         </div>
-        <div className="p-6 bg-white border rounded-xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Invoices</h3>
-          <p className="text-2xl font-bold mt-2">+0</p>
-        </div>
-        <div className="p-6 bg-white border rounded-xl shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500">Active Clients</h3>
-          <p className="text-2xl font-bold mt-2">+0</p>
+        <div className="col-span-3">
+            <RecentSales sales={data.recentSales} />
         </div>
       </div>
     </div>
