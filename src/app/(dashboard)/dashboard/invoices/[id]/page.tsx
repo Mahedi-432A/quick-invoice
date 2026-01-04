@@ -2,12 +2,13 @@ import { getInvoiceById } from "@/actions/invoice-actions";
 import { getSettings } from "@/actions/settings-actions";
 import { auth } from "@/auth";
 import { InvoicePDF } from "@/components/modules/invoice-pdf";
-import { PaymentModal } from "@/components/modules/payment-modal"; // নতুন ইমপোর্ট
+import { PaymentModal } from "@/components/modules/payment-modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EmailSender } from "@/components/modules/email-sender";
 
 export default async function InvoiceViewPage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -49,6 +50,8 @@ export default async function InvoiceViewPage({ params }: { params: { id: string
 
         {/* Action Buttons */}
         <div className="flex gap-3">
+          {/* ১. ইমেইল বাটন যোগ করা হলো */}
+          <EmailSender invoiceId={invoice._id} email={invoice.clientId?.email} />
           {/* যদি টাকা বাকি থাকে, তবেই Payment বাটন দেখাবো */}
           {!isFullyPaid && (
             <PaymentModal invoiceId={invoice._id} dueAmount={dueAmount} />
