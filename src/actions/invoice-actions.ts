@@ -5,6 +5,7 @@ import connectDB from "@/lib/db";
 import Invoice from "@/models/invoice-model";
 import Client from "@/models/client-model";
 import { revalidatePath } from "next/cache";
+import { checkInvoiceLimit } from "@/lib/limiter";
 
 interface InvoiceItem {
   description: string;
@@ -64,6 +65,12 @@ export async function getInvoices() {
 export async function createInvoice(data: InvoiceData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const isAllowed = await checkInvoiceLimit();
+  
+  if (!isAllowed) {
+    return { error: "Free plan limit reached! Please upgrade to Pro." };
+  }
 
   try {
     await connectDB();
