@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { getPendingPayment } from "@/actions/payment-actions";
+import { ManualPaymentModal } from "@/components/modules/manual-payment-modal";
 import {
   Card,
   CardContent,
@@ -10,14 +12,18 @@ import {
 } from "@/components/ui/card";
 import { PLANS } from "@/lib/config";
 import { getUserUsage } from "@/lib/limiter";
-import { Check, Crown } from "lucide-react";
+import { Check, Crown, Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function SubscriptionPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const usage = await getUserUsage();
+  const [usage, pendingPayment] = await Promise.all([
+    getUserUsage(),
+    getPendingPayment(),
+  ]);
+
   const isPro = usage.plan === "pro";
 
   return (
@@ -108,12 +114,16 @@ export default async function SubscriptionPage() {
               <Button className="w-full bg-green-600 hover:bg-green-700 text-white" disabled>
                 Active Plan
               </Button>
-            ) : (
-              // আপাতত বাটনটি ডিসেবল বা ডামি অ্যাকশন হিসেবে থাকবে
-              // পরের ফেজে আমরা এখানে Stripe কানেক্ট করব
-              <Button className="w-full bg-linear-to-r from-yellow-500 to-orange-600 text-white hover:opacity-90 border-0">
-                Upgrade to Pro
+            ) : pendingPayment ? (
+               // যদি পেমেন্ট পেন্ডিং থাকে
+              <Button className="w-full bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200" disabled>
+                <Clock className="mr-2 h-4 w-4" /> Approval Pending
               </Button>
+            ) : (
+              // পেমেন্ট মডাল
+              <div className="w-full">
+                <ManualPaymentModal />
+              </div>
             )}
           </CardFooter>
         </Card>
