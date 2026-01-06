@@ -21,8 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-// প্রোডাকশনে 'sonner' বা 'react-hot-toast' ব্যবহার করা ভালো, আপাতত alert রাখলাম
-// import { toast } from "sonner"; 
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export function ManualPaymentModal() {
   const [open, setOpen] = useState(false);
@@ -39,9 +41,17 @@ export function ManualPaymentModal() {
 
     if (result.success) {
       setOpen(false);
-      alert("Success: " + result.success); // Toast হলে: toast.success(result.success)
+      Swal.fire({
+        title: "Success!",
+        icon: "success",
+        text: result.success || "Payment request submitted successfully.",
+      });
     } else {
-      alert("Error: " + result.error); // Toast হলে: toast.error(result.error)
+      MySwal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: result.error || "Something went wrong!",
+      });
     }
   }
 
@@ -49,7 +59,7 @@ export function ManualPaymentModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full bg-linear-to-r from-pink-600 to-purple-600 text-white hover:opacity-90 border-0 shadow-md">
-          Upgrade to Pro (900 BDT)
+          Upgrade to Pro (500 BDT)
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-106.25">
@@ -63,21 +73,32 @@ export function ManualPaymentModal() {
         {/* Payment Info Box */}
         <div className="bg-slate-50 p-4 rounded-md text-sm space-y-2 border border-slate-200">
           <div className="flex justify-between items-center">
-            <span className="font-semibold text-pink-600">Bkash (Personal):</span>
-            <span className="font-mono bg-white px-2 py-0.5 rounded border">017XXXXXXXX</span>
+            <span className="font-semibold text-pink-600">
+              Bkash (Personal):
+            </span>
+            <span className="font-mono bg-white px-2 py-0.5 rounded border">
+              01869184979
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-semibold text-orange-600">Nagad (Personal):</span>
-            <span className="font-mono bg-white px-2 py-0.5 rounded border">018XXXXXXXX</span>
+            <span className="font-semibold text-orange-600">
+              Nagad (Personal):
+            </span>
+            <span className="font-mono bg-white px-2 py-0.5 rounded border">
+              018xxxxxxxx
+            </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-semibold text-blue-500">Rocket (Personal):</span>
-            <span className="font-mono bg-white px-2 py-0.5 rounded border">018XXXXXXXX</span>
+            <span className="font-semibold text-blue-500">
+              Rocket (Personal):
+            </span>
+            <span className="font-mono bg-white px-2 py-0.5 rounded border">
+              018xxxxxxxx
+            </span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4 py-2">
-          
           {/* Method Selection */}
           <div className="grid gap-2">
             <Label htmlFor="method">Payment Method</Label>
@@ -87,34 +108,40 @@ export function ManualPaymentModal() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="bkash">Bkash</SelectItem>
-                <SelectItem value="nagad">Nagad</SelectItem>
-                <SelectItem value="rocket">Rocket</SelectItem>
+                <SelectItem disabled value="nagad">
+                  Nagad
+                </SelectItem>
+                <SelectItem disabled value="rocket">
+                  Rocket
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Sender Number Input (NEW ADDED) */}
           <div className="grid gap-2">
-            <Label htmlFor="senderNumber">Sender Number (যে নম্বর থেকে পাঠিয়েছেন)</Label>
-            <Input 
-                id="senderNumber" 
-                name="senderNumber" 
-                placeholder="017..." 
-                type="tel" 
-                minLength={11}
-                required 
+            <Label htmlFor="senderNumber">
+              Sender Number (যে নম্বর থেকে পাঠিয়েছেন)
+            </Label>
+            <Input
+              id="senderNumber"
+              name="senderNumber"
+              placeholder="017..."
+              type="tel"
+              minLength={11}
+              required
             />
           </div>
-          
+
           {/* Transaction ID Input */}
           <div className="grid gap-2">
             <Label htmlFor="trxId">Transaction ID (TrxID)</Label>
-            <Input 
-                id="trxId" 
-                name="trxId" 
-                placeholder="e.g. 9H7G6X..." 
-                required 
-                className="uppercase placeholder:normal-case"
+            <Input
+              id="trxId"
+              name="trxId"
+              placeholder="e.g. 9H7G6X..."
+              required
+              className="uppercase placeholder:normal-case"
             />
           </div>
 

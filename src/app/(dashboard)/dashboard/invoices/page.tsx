@@ -10,13 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Plus, Trash2, FileText } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { DeleteInvoiceBtn } from "@/components/modules/delete-invoice-btn";
 
-// ইনভয়েস টাইপ ইন্টারফেস
 interface Invoice {
   _id: string;
   invoiceName: string;
@@ -25,7 +24,7 @@ interface Invoice {
     email: string;
   };
   totalAmount: number;
-  status: string;
+  status: "pending" | "paid" | "overdue";
   date: string;
   dueDate: string;
 }
@@ -38,7 +37,6 @@ export default async function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Invoices</h1>
         <Link href="/dashboard/invoices/create">
@@ -48,7 +46,6 @@ export default async function InvoicesPage() {
         </Link>
       </div>
 
-      {/* Invoice Table */}
       <div className="border rounded-lg p-4 bg-white shadow-sm">
         <Table>
           <TableHeader>
@@ -64,7 +61,10 @@ export default async function InvoicesPage() {
           <TableBody>
             {invoices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-gray-500">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-10 text-gray-500"
+                >
                   No invoices found. Create your first invoice!
                 </TableCell>
               </TableRow>
@@ -76,34 +76,46 @@ export default async function InvoicesPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium">{invoice.clientId?.name}</span>
-                      <span className="text-xs text-gray-500">{invoice.clientId?.email}</span>
+                      <span className="font-medium">
+                        {invoice.clientId?.name || "Unknown"}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {invoice.clientId?.email}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     {format(new Date(invoice.date), "dd MMM yyyy")}
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={invoice.status === "paid" ? "default" : "secondary"}
-                      className={invoice.status === "pending" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" : ""}
+                    <Badge
+                      variant={
+                        invoice.status === "paid" ? "default" : "secondary"
+                      }
+                      className={
+                        invoice.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                          : invoice.status === "paid"
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : ""
+                      }
                     >
-                      {invoice.status}
+                      {invoice.status.charAt(0).toUpperCase() +
+                        invoice.status.slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right font-bold">
                     ৳ {invoice.totalAmount.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {/* View / Print Button (Future Phase) */}
+                    <div className="flex justify-end gap-2 items-center">
                       <Link href={`/dashboard/invoices/${invoice._id}`}>
-                         <Button variant="outline" size="icon">
-                           <FileText className="h-4 w-4" />
-                         </Button>
+                        <Button variant="outline" size="icon">
+                          <FileText className="h-4 w-4" />
+                        </Button>
                       </Link>
 
-                      {/* Delete Button */}
+                      {/* ফিক্সড: Inline Server Action এবং invoiceId পাস করা হয়েছে */}
                       <DeleteInvoiceBtn invoiceId={invoice._id} />
                     </div>
                   </TableCell>
