@@ -1,8 +1,15 @@
+import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { PLANS } from "@/lib/config";
 import { Check, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
+
+// ১. SEO এর জন্য মেটাডাটা কনফিগারেশন এখানে যোগ করা হয়েছে
+export const metadata: Metadata = {
+  title: "Best Free Invoice Generator for Small Business | QuickInvoice",
+  description: "QuickInvoice is the best free tool to generate PDF invoices, track payments, and manage clients in Bangladesh. Try for free today!",
+};
 
 export default async function Home() {
   const session = await auth();
