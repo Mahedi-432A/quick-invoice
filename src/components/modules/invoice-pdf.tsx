@@ -43,10 +43,11 @@ interface SettingsData {
 
 interface InvoicePDFProps {
   invoice: InvoiceData;
-  settings: SettingsData | null; // সেটিংস নাও থাকতে পারে
+  settings: SettingsData | null;
+  isPro: boolean;
 }
 
-export function InvoicePDF({ invoice, settings }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, settings, isPro }: InvoicePDFProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   
   const handlePrint = useReactToPrint({
@@ -162,8 +163,14 @@ export function InvoicePDF({ invoice, settings }: InvoicePDFProps) {
 
         {/* Footer */}
         <div className="mt-16 border-t pt-8 text-center text-sm text-gray-500">
-          <p>Thank you for your business!</p>
+          <p>Your satisfaction, our priority.</p>
         </div>
+
+        {!isPro && (
+            <p className="mt-4 text-xs text-gray-400 italic">
+              Powered by <span className="font-semibold">QuickInvoice</span> - Create your own invoice for free.
+            </p>
+          )}
 
       </Card>
     </div>

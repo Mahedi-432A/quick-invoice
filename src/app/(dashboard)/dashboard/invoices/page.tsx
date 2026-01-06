@@ -14,6 +14,7 @@ import { Plus, Trash2, FileText } from "lucide-react";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { DeleteInvoiceBtn } from "@/components/modules/delete-invoice-btn";
 
 // ইনভয়েস টাইপ ইন্টারফেস
 interface Invoice {
@@ -103,20 +104,7 @@ export default async function InvoicesPage() {
                       </Link>
 
                       {/* Delete Button */}
-                      <form
-                        action={async () => {
-                          "use server";
-                          await deleteInvoice(invoice._id);
-                        }}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </form>
+                      <DeleteInvoiceBtn invoiceId={invoice._id} />
                     </div>
                   </TableCell>
                 </TableRow>

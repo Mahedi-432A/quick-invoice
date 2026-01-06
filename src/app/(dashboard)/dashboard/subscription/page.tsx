@@ -49,19 +49,19 @@ export default async function SubscriptionPage() {
             <ul className="mt-6 space-y-3">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
-                Up to {PLANS.FREE.invoiceLimit} Invoices/month
+                Create up to {PLANS.FREE.invoiceLimit} Invoices/month
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
-                Basic Dashboard Analytics
+                Unlimited Client Management
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
-                Unlimited Clients
+                Basic Revenue Tracking
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
-                PDF Export
+                Standard PDF Export
               </li>
             </ul>
           </CardContent>
@@ -93,19 +93,19 @@ export default async function SubscriptionPage() {
             <ul className="mt-6 space-y-3">
               <li className="flex items-center gap-2 font-medium">
                 <Check className="h-5 w-5 text-green-600" />
-                Unlimited Invoices
+                Unlimited Invoices & Estimates
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
-                Advanced Charts & Reports
+                Yearly Financial Insights (Advanced Charts)
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                White-label Invoices (No &quot;Powered by&quot; Watermark)
               </li>
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
                 Priority Email Support
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                Remove &quot;Powered by QuickInvoice&quot;
               </li>
             </ul>
           </CardContent>

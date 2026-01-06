@@ -35,9 +35,7 @@ export default async function Home() {
 
       {/* 2. Hero Section */}
       <section className="py-20 text-center space-y-6 max-w-3xl mx-auto px-6">
-        <div className="inline-block px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-600 mb-4">
-          🚀 The #1 Invoicing App for Bangladesh
-        </div>
+        
         <h2 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
           Manage Invoices <br/> <span className="text-primary">Without the Headache.</span>
         </h2>

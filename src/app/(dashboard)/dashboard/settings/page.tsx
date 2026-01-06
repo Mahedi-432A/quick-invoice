@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SettingsForm } from "./settings-form"; // ইমপোর্ট করছি
+import { SettingsForm } from "./settings-form";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 

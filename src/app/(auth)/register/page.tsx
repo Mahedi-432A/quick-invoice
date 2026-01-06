@@ -1,4 +1,4 @@
-"use client"; // ফ্রন্টএন্ড ইন্টারঅ্যাকশন (যেমন বাটন ক্লিক) এর জন্য
+"use client"; 
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { registerUser } from "@/actions/auth-actions"; // আমাদের সার্ভার অ্যাকশন
+import { registerUser } from "@/actions/auth-actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -26,7 +26,6 @@ export default function RegisterPage() {
     if (result?.error) {
       setError(result.error);
     } else {
-      // সফল হলে লগইন পেজে পাঠিয়ে দেওয়া
       router.push("/login");
     }
   }
@@ -42,11 +41,11 @@ export default function RegisterPage() {
           <form action={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" placeholder="John Doe" required />
+              <Input id="name" name="name" placeholder="Your Name" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" name="email" type="email" placeholder="mail@example.com" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

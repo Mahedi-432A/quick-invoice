@@ -9,6 +9,8 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EmailSender } from "@/components/modules/email-sender";
+import User from "@/models/user-model";
+import connectDB from "@/lib/db";
 
 export default async function InvoiceViewPage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -17,6 +19,10 @@ export default async function InvoiceViewPage({ params }: { params: { id: string
   const { id } = await params;
   const invoice = await getInvoiceById(id);
   const settings = await getSettings();
+
+  await connectDB();
+  const user = await User.findById(session.user.id).select("plan");
+  const isPro = user?.plan === "pro";
 
   if (!invoice) {
     return <div className="p-10 text-center">Invoice not found!</div>;
@@ -50,9 +56,8 @@ export default async function InvoiceViewPage({ params }: { params: { id: string
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          {/* ১. ইমেইল বাটন যোগ করা হলো */}
           <EmailSender invoiceId={invoice._id} email={invoice.clientId?.email} />
-          {/* যদি টাকা বাকি থাকে, তবেই Payment বাটন দেখাবো */}
+          
           {!isFullyPaid && (
             <PaymentModal invoiceId={invoice._id} dueAmount={dueAmount} />
           )}
@@ -76,7 +81,7 @@ export default async function InvoiceViewPage({ params }: { params: { id: string
       </div>
 
       {/* PDF View */}
-      <InvoicePDF invoice={invoice} settings={settings} />
+      <InvoicePDF invoice={invoice} settings={settings} isPro={isPro} />
     </div>
   );
 }
